@@ -6,7 +6,7 @@
       <textarea
         v-model="prompt"
         rows="3"
-        class="w-full rounded-lg border-neutral-200 resize-none"
+        class="textarea-base resize-none"
         placeholder="Describe the image you want to create..."
       />
     </div>
@@ -63,9 +63,9 @@
       <textarea
         v-model="negativePrompt"
         rows="2"
-        class="w-full rounded-lg border-neutral-200 resize-none"
+        class="textarea-base resize-none"
         placeholder="Describe what you don't want in the image..."
-      />
+      ></textarea>
     </div>
 
     <!-- Generate Button -->

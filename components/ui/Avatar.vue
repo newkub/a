@@ -9,7 +9,7 @@
       v-if="src"
       :src="src"
       :alt="alt"
-      class="w-full h-full object-cover"
+      class="img"
     />
     <div 
       v-else

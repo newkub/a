@@ -7,7 +7,7 @@
           <h2 class="text-lg font-semibold">Profile Information</h2>
           <p class="text-neutral-600">Manage your personal information</p>
         </div>
-        <button class="btn-primary">
+        <button class="btn btn-primary">
           Save Changes
         </button>
       </div>
@@ -17,7 +17,7 @@
           <img
             :src="profile.avatar || 'https://avatars.githubusercontent.com/u/142387426?s=200&v=4'"
             alt="Profile"
-            class="w-24 h-24 rounded-xl object-cover"
+            class="img-round w-24 h-24"
           />
           <button class="absolute bottom-0 right-0 p-2 bg-white rounded-lg shadow-sm border border-neutral-200 hover:bg-neutral-50">
             <Icon icon="mdi:camera" class="text-lg" />
@@ -61,7 +61,7 @@
           <textarea
             v-model="profile.bio"
             rows="3"
-            class="w-full rounded-lg border border-neutral-200 p-2 resize-none"
+            class="textarea-base resize-none"
           />
         </div>
 

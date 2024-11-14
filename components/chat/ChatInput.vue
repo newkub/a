@@ -1,55 +1,49 @@
 <template>
   <div class="relative">
-    <textarea
-      ref="inputRef"
-      v-model="inputValue"
-      rows="3"
-      class="w-full bg-neutral-50 rounded-xl px-4 py-4 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-base resize-none overflow-y-auto"
-      :class="{ 'opacity-50': disabled }"
-      placeholder="Type a message... (Enter to send, Shift + Enter for new line)"
-      @input="handleInput"
-      @keydown="handleKeydown"
-      @paste="handlePaste"
-      :disabled="disabled"
-    />
-    
-    <!-- Slash Commands Menu -->
-    <div v-if="showSlashCommands && inputValue.endsWith('/')" 
-      class="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-lg shadow-lg border border-neutral-200 max-h-64 overflow-y-auto">
-      <div class="p-2">
-        <div v-for="command in filteredCommands" 
-          :key="command.id"
-          class="flex items-center gap-2 p-2 hover:bg-neutral-50 rounded-lg cursor-pointer"
-          @click="selectCommand(command)"
+    <div class="border border-neutral-200 rounded-xl bg-white">
+      <textarea
+        ref="inputRef"
+        v-model="inputValue"
+        rows="3"
+        class="textarea-base w-full rounded-t-xl px-4 py-4 resize-none overflow-y-auto"
+        :class="{ 'opacity-50': disabled }"
+        placeholder="Type a message... (Enter to send, Shift + Enter for new line)"
+        @input="handleInput"
+        @keydown="handleKeydown"
+        @paste="handlePaste"
+        :disabled="disabled"
+      />
+      
+      <!-- Options Bar -->
+      <div class="px-4 py-2 border-t border-neutral-200 flex items-center gap-4">
+        <button
+          v-for="option in options"
+          :key="option.id"
+          class="flex items-center gap-2 text-sm text-neutral-600 hover:text-primary-600 transition-colors"
         >
-          <Icon :icon="command.icon" class="text-lg text-neutral-600" />
-          <div>
-            <div class="font-medium">{{ command.label }}</div>
-            <div class="text-xs text-neutral-500">{{ command.description }}</div>
-          </div>
-        </div>
+          <Icon :icon="option.icon" class="text-lg" />
+          <span>{{ option.label }}</span>
+        </button>
       </div>
     </div>
 
+    <!-- Slash Commands Menu -->
+    <SlashCommandMenu
+      :is-visible="slashCommands.isVisible"
+      :search-query="slashCommands.searchQuery"
+      :filtered-commands="slashCommands.filteredCommands"
+      @select="handleCommandSelect"
+      @update:search-query="slashCommands.searchQuery = $event"
+    />
+
     <!-- Mention Menu -->
-    <div v-if="showMentions && inputValue.endsWith('@')"
-      class="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-lg shadow-lg border border-neutral-200 max-h-64 overflow-y-auto">
-      <div class="p-2">
-        <div v-for="user in filteredUsers" 
-          :key="user.id"
-          class="flex items-center gap-2 p-2 hover:bg-neutral-50 rounded-lg cursor-pointer"
-          @click="selectUser(user)"
-        >
-          <div class="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center">
-            <Icon icon="mdi:account" class="text-lg text-neutral-600" />
-          </div>
-          <div>
-            <div class="font-medium">{{ user.name }}</div>
-            <div class="text-xs text-neutral-500">{{ user.role }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <MentionMenu
+      :is-visible="mentions.isVisible"
+      :search-query="mentions.searchQuery"
+      :filtered-users="mentions.filteredUsers"
+      @select="handleUserSelect"
+      @update:search-query="mentions.searchQuery = $event"
+    />
     
     <div class="absolute right-2 top-4 flex items-center gap-2">
       <button
@@ -106,42 +100,40 @@ const inputValue = computed({
   set: (value) => emit('update:modelValue', value)
 })
 
-const showSlashCommands = ref(false)
-const showMentions = ref(false)
-const commandSearch = ref('')
-const mentionSearch = ref('')
-
-const commands = [
-  { id: 'translate', label: 'Translate', icon: 'mdi:translate', description: 'Translate text to another language' },
-  { id: 'enhance', label: 'Enhance', icon: 'mdi:lightbulb', description: 'Enhance your writing' },
-  { id: 'summarize', label: 'Summarize', icon: 'mdi:text', description: 'Create a summary' }
-]
-
-const users = [
-  { id: '1', name: 'John Doe', role: 'Developer' },
-  { id: '2', name: 'Jane Smith', role: 'Designer' },
-  { id: '3', name: 'Bob Johnson', role: 'Manager' }
-]
-
-const filteredCommands = computed(() => {
-  if (!commandSearch.value) return commands
-  return commands.filter(cmd => 
-    cmd.label.toLowerCase().includes(commandSearch.value.toLowerCase()) ||
-    cmd.description.toLowerCase().includes(commandSearch.value.toLowerCase())
-  )
-})
-
-const filteredUsers = computed(() => {
-  if (!mentionSearch.value) return users
-  return users.filter(user => 
-    user.name.toLowerCase().includes(mentionSearch.value.toLowerCase()) ||
-    user.role.toLowerCase().includes(mentionSearch.value.toLowerCase())
-  )
-})
+const slashCommands = useSlashCommands()
+const mentions = useMentions()
 
 const canSend = computed(() => 
   inputValue.value.trim().length > 0 && !props.loading && !props.disabled
 )
+
+const options = [
+  {
+    id: 'upload',
+    label: 'Upload File',
+    icon: 'mdi:file-upload'
+  },
+  {
+    id: 'enhance',
+    label: 'Prompt Enhance',
+    icon: 'mdi:magic-wand'
+  },
+  {
+    id: 'whiteboard',
+    label: 'Whiteboard',
+    icon: 'mdi:drawing'
+  },
+  {
+    id: 'screenshot',
+    label: 'Screenshot',
+    icon: 'mdi:camera'
+  },
+  {
+    id: 'screen-recorder',
+    label: 'Screen Recorder',
+    icon: 'mdi:video'
+  }
+]
 
 const handleInput = (event: Event) => {
   const target = event.target as HTMLTextAreaElement
@@ -149,33 +141,29 @@ const handleInput = (event: Event) => {
   const lastChar = value[value.length - 1]
   
   if (lastChar === '/') {
-    showSlashCommands.value = true
-    showMentions.value = false
-    commandSearch.value = ''
+    slashCommands.show()
+    mentions.hide()
   } else if (lastChar === '@') {
-    showMentions.value = true
-    showSlashCommands.value = false
-    mentionSearch.value = ''
+    mentions.show()
+    slashCommands.hide()
   } else {
-    showSlashCommands.value = false
-    showMentions.value = false
+    slashCommands.hide()
+    mentions.hide()
   }
   
   adjustHeight()
 }
 
-const selectCommand = (command: typeof commands[0]) => {
+const handleCommandSelect = (command: any) => {
   const text = inputValue.value
   const lastSlashIndex = text.lastIndexOf('/')
-  inputValue.value = text.slice(0, lastSlashIndex) + `/${command.label} `
-  showSlashCommands.value = false
+  inputValue.value = text.slice(0, lastSlashIndex) + slashCommands.selectCommand(command)
 }
 
-const selectUser = (user: typeof users[0]) => {
+const handleUserSelect = (user: any) => {
   const text = inputValue.value
   const lastMentionIndex = text.lastIndexOf('@')
-  inputValue.value = text.slice(0, lastMentionIndex) + `@${user.name} `
-  showMentions.value = false
+  inputValue.value = text.slice(0, lastMentionIndex) + mentions.selectUser(user)
 }
 
 const adjustHeight = () => {
@@ -196,8 +184,8 @@ const handleKeydown = (event: KeyboardEvent) => {
       adjustHeight()
     })
   } else if (event.key === 'Escape') {
-    showSlashCommands.value = false
-    showMentions.value = false
+    slashCommands.hide()
+    mentions.hide()
   }
 }
 
@@ -242,8 +230,8 @@ onMounted(() => {
 
 // Close menus when clicking outside
 onClickOutside(inputRef, () => {
-  showSlashCommands.value = false
-  showMentions.value = false
+  slashCommands.hide()
+  mentions.hide()
 })
 </script>
 

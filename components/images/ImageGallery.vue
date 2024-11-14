@@ -10,7 +10,7 @@
         <img
           :src="image.url"
           :alt="image.prompt"
-          class="w-full h-full object-cover"
+          class="img-round img-hover"
         />
         
         <!-- Overlay -->

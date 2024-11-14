@@ -90,10 +90,10 @@
               </td>
               <td class="p-4">
                 <div class="flex items-center justify-end gap-2">
-                  <button class="p-2 text-neutral-base hover:text-primary-base rounded-lg">
+                  <button class="btn-ghost p-2 hover:text-primary-600">
                     <Icon icon="mdi:eye" class="text-lg" />
                   </button>
-                  <button class="p-2 text-neutral-base hover:text-primary-base rounded-lg">
+                  <button class="btn-ghost p-2 hover:text-primary-600">
                     <Icon icon="mdi:download" class="text-lg" />
                   </button>
                 </div>

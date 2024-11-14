@@ -4,7 +4,7 @@
       <div class="flex items-center gap-2">
         <div class="w-8 h-8 rounded-lg flex items-center justify-center">
           <template v-if="provider === 'anthropic'">
-            <img src="https://avatars.githubusercontent.com/u/49760167?s=200&v=4" class="w-6 h-6 rounded" />
+            <img src="https://avatars.githubusercontent.com/u/49760167?s=200&v=4" class="img-round-sm w-6 h-6" />
           </template>
           <template v-else>
             <Icon icon="simple-icons:openai" class="text-xl" />

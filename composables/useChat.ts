@@ -1,32 +1,9 @@
-import { ref } from 'vue'
-import MarkdownIt from 'markdown-it'
+import { ref, computed } from 'vue'
+import type { ChatMessage, ChatSettings } from '~/types/chat'
 
-const md = new MarkdownIt({
-  html: true,
-  breaks: true,
-  linkify: true
-})
-
-export interface Message {
-  id: string
-  content: string
-  isBot: boolean
-  timestamp: number
-}
-
-export interface ChatSettings {
-  model: string
-  customName: string
-  customInstructions: string
-  temperature: number
-  topP: number
-  frequencyPenalty: number
-  presencePenalty: number
-  stream: boolean
-}
-
-export const useChat = () => {
-  const messages = ref<Message[]>([])
+export const useChat = (options: { initialMessages?: ChatMessage[] } = {}) => {
+  const messages = ref<ChatMessage[]>(options.initialMessages || [])
+  const isLoading = ref(false)
   const isFirstLoad = ref(true)
 
   const settings = ref<ChatSettings>({
@@ -40,86 +17,81 @@ export const useChat = () => {
     stream: true
   })
 
-  const showWelcomeMessage = () => {
-    if (isFirstLoad.value) {
-      messages.value = [{
-        id: Date.now().toString(),
-        content: `# Welcome to Wrikka OS Chat! 👋
+  const hasMessages = computed(() => messages.value.length > 0)
 
-I'm your AI assistant. I'm here to help you with:
-
-- Writing and analysis
-- Research and information
-- Programming and technical tasks
-- Creative projects
-
-Feel free to ask me anything. How can I assist you today?`,
-        isBot: true,
-        timestamp: Date.now()
-      }]
-      isFirstLoad.value = false
-    }
+  const addMessage = (content: string, isBot: boolean) => {
+    messages.value.push({
+      id: Date.now().toString(),
+      content,
+      role: isBot ? 'assistant' : 'user',
+      timestamp: new Date()
+    })
   }
 
-  const generateResponse = async (userMessage: string) => {
-    // Simulate AI response generation
+  const generateResponse = async (userMessage: string): Promise<string> => {
     const responses = [
       "I understand your question. Let me help you with that.",
       "That's an interesting topic. Here's what I know about it:",
       "I can help you with that. Here's my suggestion:",
       "Based on your request, here's what I recommend:",
-      "Let me analyze that for you.",
+      "Let me analyze that for you."
     ]
     
     const randomResponse = responses[Math.floor(Math.random() * responses.length)]
-    const detailedResponse = `${randomResponse}\n\nRegarding "${userMessage}", here are some key points to consider:\n\n` +
+    return `${randomResponse}\n\nRegarding "${userMessage}", here are some key points:\n\n` +
       "1. First, let's break this down systematically\n" +
       "2. Consider the main aspects of your question\n" +
       "3. Here's a practical approach to address this\n\n" +
       "Would you like me to elaborate on any of these points?"
-    
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    return detailedResponse
   }
 
   const sendMessage = async (content: string) => {
     if (!content.trim()) return
 
-    // Add user message
-    messages.value.push({
-      id: Date.now().toString(),
-      content,
-      isBot: false,
-      timestamp: Date.now()
-    })
+    addMessage(content, false)
+    isLoading.value = true
 
     try {
-      // Generate AI response
       const response = await generateResponse(content)
-      
-      // Add AI response
-      messages.value.push({
-        id: (Date.now() + 1).toString(),
-        content: response,
-        isBot: true,
-        timestamp: Date.now() + 1
-      })
+      addMessage(response, true)
     } catch (error) {
       console.error('Failed to generate response:', error)
-      messages.value.push({
-        id: (Date.now() + 1).toString(),
-        content: "I apologize, but I encountered an error processing your request. Please try again.",
-        isBot: true,
-        timestamp: Date.now() + 1
-      })
+      addMessage(
+        "I apologize, but I encountered an error processing your request. Please try again.",
+        true
+      )
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const clearMessages = () => {
+    messages.value = []
+    isFirstLoad.value = true
+  }
+
+  const showWelcomeMessage = () => {
+    if (isFirstLoad.value) {
+      addMessage(
+        `# Welcome to Wrikka OS Chat! 👋\n\nI'm your AI assistant. I'm here to help you with:\n\n` +
+        "- Writing and analysis\n" +
+        "- Research and information\n" +
+        "- Programming and technical tasks\n" +
+        "- Creative projects\n\n" +
+        "Feel free to ask me anything. How can I assist you today?",
+        true
+      )
+      isFirstLoad.value = false
     }
   }
 
   return {
     messages,
     settings,
+    isLoading,
+    hasMessages,
     sendMessage,
+    clearMessages,
     showWelcomeMessage
   }
 }

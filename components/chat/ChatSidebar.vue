@@ -3,61 +3,7 @@
     <!-- Model Selection -->
     <div class="mb-6">
       <h3 class="text-sm font-medium text-neutral-700 mb-2">Model</h3>
-      <div class="relative">
-        <button
-          @click="isModelDropdownOpen = !isModelDropdownOpen"
-          class="w-full p-3 flex items-center justify-between bg-white border border-neutral-200 rounded-lg text-sm hover:border-neutral-300"
-        >
-          <span>{{ selectedModel.name }}</span>
-          <Icon 
-            :icon="isModelDropdownOpen ? 'mdi:chevron-up' : 'mdi:chevron-down'" 
-            class="text-lg text-neutral-500"
-          />
-        </button>
-
-        <div
-          v-if="isModelDropdownOpen"
-          class="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg"
-        >
-          <div class="p-2 border-b border-neutral-200">
-            <input
-              v-model="modelSearch"
-              type="text"
-              placeholder="Search models..."
-              class="w-full p-2 bg-neutral-50 rounded-lg text-sm"
-            />
-          </div>
-          <div class="max-h-64 overflow-y-auto p-2">
-            <div v-for="provider in filteredProviders" :key="provider.id" class="mb-2">
-              <div class="flex items-center gap-2 p-1">
-                <img
-                  v-if="provider.id === 'anthropic'"
-                  src="https://avatars.githubusercontent.com/u/49760167?s=200&v=4"
-                  class="w-5 h-5 rounded"
-                  alt="Anthropic"
-                />
-                <Icon
-                  v-else-if="provider.id === 'openai'"
-                  icon="simple-icons:openai"
-                  class="w-5 h-5"
-                />
-                <span class="text-sm font-medium">{{ provider.name }}</span>
-              </div>
-              <div class="space-y-1 ml-6">
-                <button
-                  v-for="model in provider.models"
-                  :key="model.id"
-                  @click="selectModel(model)"
-                  class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-neutral-50 transition-colors text-sm"
-                  :class="selectedModel.id === model.id ? 'bg-neutral-100' : ''"
-                >
-                  {{ model.name }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ModelSelector v-model="selectedModelId" />
     </div>
 
     <!-- Chat Settings -->
@@ -113,86 +59,17 @@
 </template>
 
 <script setup lang="ts">
-import { Icon } from '@iconify/vue'
 import { ref, computed } from 'vue'
+import { Icon } from '@iconify/vue'
+import ModelSelector from './ModelSelector.vue'
 
-interface Model {
-  id: string
-  name: string
-}
-
-interface Provider {
-  id: string
-  name: string
-  models: Model[]
-}
-
-// Model selection
-const isModelDropdownOpen = ref(false)
-const modelSearch = ref('')
-const selectedModel = ref<Model>({
-  id: 'claude-3-haiku',
-  name: 'Claude 3 Haiku'
-})
-
-// Chat settings
+// Settings
 const temperature = ref(0.7)
 const maxLength = ref(2000)
 const streamResponse = ref(true)
 
-// Available models
-const providers: Provider[] = [
-  {
-    id: 'anthropic',
-    name: 'Anthropic',
-    models: [
-      { id: 'claude-3-haiku', name: 'Claude 3 Haiku' },
-      { id: 'claude-3-opus', name: 'Claude 3 Opus' },
-      { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet' }
-    ]
-  },
-  {
-    id: 'openai',
-    name: 'OpenAI',
-    models: [
-      { id: 'gpt-4', name: 'GPT-4' },
-      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo' },
-      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' }
-    ]
-  }
-]
-
-const filteredProviders = computed(() => {
-  if (!modelSearch.value) return providers
-  
-  return providers.map(provider => ({
-    ...provider,
-    models: provider.models.filter(model =>
-      model.name.toLowerCase().includes(modelSearch.value.toLowerCase())
-    )
-  })).filter(provider => provider.models.length > 0)
-})
-
-const selectModel = (model: Model) => {
-  selectedModel.value = model
-  isModelDropdownOpen.value = false
-}
-
-// Close dropdown when clicking outside
-onMounted(() => {
-  const handleClickOutside = (event: MouseEvent) => {
-    const target = event.target as HTMLElement
-    if (!target.closest('.relative')) {
-      isModelDropdownOpen.value = false
-    }
-  }
-  
-  document.addEventListener('click', handleClickOutside)
-  
-  onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside)
-  })
-})
+// Model selection
+const selectedModelId = ref('gpt-4')
 </script>
 
 <style scoped>

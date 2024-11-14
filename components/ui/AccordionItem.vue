@@ -1,7 +1,7 @@
 <template>
   <div class="border border-neutral-200 rounded-lg overflow-hidden mb-4 last:mb-0">
     <button
-      class="w-full px-4 py-3 flex items-center justify-between bg-white hover:bg-neutral-50"
+      class="btn-ghost w-full px-4 py-3 flex items-center justify-between bg-white hover:bg-neutral-50"
       @click="isOpen = !isOpen"
     >
       <slot name="title">

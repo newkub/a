@@ -5,7 +5,7 @@
         v-if="thumbnail"
         :src="thumbnail"
         :alt="title"
-        class="w-full h-full object-cover"
+        class="img"
       />
       <div v-else class="w-full h-full flex items-center justify-center text-neutral-400">
         <Icon icon="mdi:image-outline" class="text-3xl" />

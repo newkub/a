@@ -1,10 +1,17 @@
 <template>
-  <div class="relative">
+  <div class="relative" ref="dropdownRef">
     <button
       @click="isOpen = !isOpen"
       class="w-full p-3 flex items-center justify-between bg-white border border-neutral-200 rounded-lg text-sm"
     >
-      <span>{{ getModelName(modelValue) }}</span>
+      <div class="flex items-center gap-2">
+        <img 
+          :src="selectedProvider?.avatar"
+          class="w-5 h-5 rounded"
+          :alt="selectedProvider?.name"
+        />
+        <span>{{ getModelName(modelValue) }}</span>
+      </div>
       <Icon :icon="isOpen ? 'mdi:chevron-up' : 'mdi:chevron-down'" class="text-lg" />
     </button>
 
@@ -25,15 +32,9 @@
         <div v-for="provider in filteredProviders" :key="provider.id" class="mb-2">
           <div class="flex items-center gap-2 p-1">
             <img
-              v-if="provider.id === 'anthropic'"
-              src="https://avatars.githubusercontent.com/u/49760167?s=200&v=4"
+              :src="provider.avatar"
               class="w-5 h-5 rounded"
-              alt="Anthropic"
-            />
-            <Icon
-              v-else-if="provider.id === 'openai'"
-              icon="simple-icons:openai"
-              class="w-5 h-5"
+              :alt="provider.name"
             />
             <span class="text-sm font-medium">{{ provider.name }}</span>
           </div>
@@ -67,56 +68,26 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
+const {
+  providers,
+  searchQuery,
+  filteredProviders,
+  getModelName,
+  getProviderByModel
+} = useModelStore()
+
 const isOpen = ref(false)
-const searchQuery = ref('')
+const dropdownRef = ref(null)
 
-const providers = [
-  {
-    id: 'anthropic',
-    name: 'Anthropic',
-    models: [
-      { id: 'claude-3-haiku', name: 'Claude 3 Haiku' },
-      { id: 'claude-3-opus', name: 'Claude 3 Opus' },
-      { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet' }
-    ]
-  },
-  {
-    id: 'openai',
-    name: 'OpenAI',
-    models: [
-      { id: 'gpt-4', name: 'GPT-4' },
-      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo' },
-      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' }
-    ]
-  }
-]
-
-const filteredProviders = computed(() => {
-  if (!searchQuery.value) return providers
-  
-  return providers.map(provider => ({
-    ...provider,
-    models: provider.models.filter(model =>
-      model.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
-  })).filter(provider => provider.models.length > 0)
-})
-
-const getModelName = (modelId: string) => {
-  for (const provider of providers) {
-    const model = provider.models.find(m => m.id === modelId)
-    if (model) return model.name
-  }
-  return 'Select a model'
-}
+const selectedProvider = computed(() => 
+  getProviderByModel(props.modelValue)
+)
 
 const selectModel = (modelId: string) => {
   emit('update:modelValue', modelId)
   isOpen.value = false
 }
 
-// Close dropdown when clicking outside
-const dropdownRef = ref(null)
 onClickOutside(dropdownRef, () => {
   isOpen.value = false
 })

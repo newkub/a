@@ -64,14 +64,14 @@
     <div class="flex items-center justify-end gap-3">
       <button
         type="button"
-        class="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg"
+        class="btn-ghost"
         @click="$emit('cancel')"
       >
         Cancel
       </button>
       <button
         type="submit"
-        class="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+        class="btn-primary"
       >
         {{ user ? 'Update User' : 'Add User' }}
       </button>

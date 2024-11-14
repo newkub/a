@@ -1,89 +1,85 @@
 <template>
   <div class="flex flex-col h-full">
-    <div class="flex-1 overflow-y-auto min-h-0">
-      <ChatMessageList 
-        :messages="messages"
-        :selected-model="selectedModel"
-      />
+    <div class="flex-1 overflow-y-auto min-h-0" ref="messagesRef">
+      <div v-if="!hasMessages" class="h-full flex items-center justify-center">
+        <EmptyState />
+      </div>
+      
+      <template v-else>
+        <div v-for="msg in messages" :key="msg.id" class="mb-6 last:mb-0 px-6 py-4">
+          <ChatMessage :message="msg" :selected-model="selectedModel" />
+        </div>
+      </template>
     </div>
+
     <div class="flex-shrink-0 p-4 border-t border-neutral-200">
-      <ChatNavBar
-        :active-item="activeNavItem"
-        :has-image="pastedImage !== null"
-        @select="handleNavSelect"
-        @remove-image="handleRemoveImage"
-        class="mb-4"
-      />
       <ChatInput
         v-model="inputMessage"
         :loading="isLoading"
-        :has-content="!!inputMessage.trim()"
+        :disabled="disabled"
         @send="handleSend"
-        @paste-image="handleImagePaste"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-}
-
 const props = defineProps<{
   selectedModel: string
-  messages: Message[]
+  disabled?: boolean
 }>()
 
-const emit = defineEmits<{
-  'update:messages': [messages: Message[]]
-}>()
+const {
+  messages,
+  isLoading,
+  sendMessage,
+  addWelcomeMessage
+} = useChatStore()
 
+const hasMessages = computed(() => messages.value.length > 0)
 const inputMessage = ref('')
-const isLoading = ref(false)
-const activeNavItem = ref('enhance')
-const pastedImage = ref<File | null>(null)
-
-const handleNavSelect = (id: string) => {
-  activeNavItem.value = id
-}
-
-const handleImagePaste = (file: File) => {
-  pastedImage.value = file
-  activeNavItem.value = 'file'
-}
-
-const handleRemoveImage = () => {
-  pastedImage.value = null
-  activeNavItem.value = 'enhance'
-}
+const messagesRef = ref<HTMLElement>()
 
 const handleSend = async (content: string) => {
-  const newMessages = [...props.messages]
-  
-  newMessages.push({
-    id: Date.now().toString(),
-    role: 'user',
-    content
-  })
-
-  emit('update:messages', newMessages)
-
-  isLoading.value = true
-  try {
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    newMessages.push({
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: `I understand you said: "${content}". This is a demo response.`
-    })
-    
-    emit('update:messages', newMessages)
-  } finally {
-    isLoading.value = false
-  }
+  await sendMessage(content)
+  inputMessage.value = ''
+  scrollToBottom()
 }
+
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (messagesRef.value) {
+      messagesRef.value.scrollTop = messagesRef.value.scrollHeight
+    }
+  })
+}
+
+watch(() => messages.value.length, scrollToBottom)
+
+onMounted(() => {
+  if (messages.value.length === 0) {
+    addWelcomeMessage()
+  }
+  scrollToBottom()
+})
 </script>
+
+<style scoped>
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #E5E7EB transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: #E5E7EB;
+  border-radius: 3px;
+}
+</style>

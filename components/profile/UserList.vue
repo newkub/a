@@ -18,13 +18,13 @@
           </Badge>
           <div class="flex items-center">
             <button 
-              class="p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg"
+              class="btn-ghost p-2"
               @click="$emit('edit', user)"
             >
               <Icon icon="mdi:pencil" class="text-lg" />
             </button>
             <button 
-              class="p-2 text-neutral-600 hover:text-error-600 hover:bg-neutral-100 rounded-lg"
+              class="btn-ghost p-2 hover:text-error-600"
               @click="$emit('delete', user)"
             >
               <Icon icon="mdi:trash" class="text-lg" />

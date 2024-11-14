@@ -1,13 +1,4 @@
-export interface Model {
-  id: string
-  name: string
-}
-
-export interface Provider {
-  id: string
-  name: string
-  models: Model[]
-}
+import type { Model, Provider } from '~/types/models'
 
 export const useModelSelector = () => {
   const isDropdownOpen = ref(false)
@@ -18,6 +9,7 @@ export const useModelSelector = () => {
     {
       id: 'anthropic',
       name: 'Anthropic',
+      avatar: 'https://avatars.githubusercontent.com/u/49760167?s=200&v=4',
       models: [
         { id: 'claude-3-haiku', name: 'Claude 3 Haiku' },
         { id: 'claude-3-opus', name: 'Claude 3 Opus' },
@@ -28,6 +20,7 @@ export const useModelSelector = () => {
     {
       id: 'openai',
       name: 'OpenAI',
+      avatar: 'https://avatars.githubusercontent.com/u/14957082?s=200&v=4',
       models: [
         { id: 'gpt-4', name: 'GPT-4' },
         { id: 'gpt-4-turbo', name: 'GPT-4 Turbo' },

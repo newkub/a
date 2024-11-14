@@ -61,10 +61,10 @@
         <textarea
           :value="modelValue.stop"
           rows="3"
-          class="w-full rounded-lg border border-neutral-200 p-3 text-sm bg-neutral-50 resize-none"
+          class="textarea-base resize-none"
           placeholder="Enter stop sequences (one per line)..."
           @input="updateSetting('stop', ($event.target as HTMLTextAreaElement).value)"
-        />
+        ></textarea>
       </div>
     </div>
   </div>

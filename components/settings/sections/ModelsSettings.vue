@@ -8,11 +8,11 @@
         </div>
         <div class="flex items-center gap-3">
           <button class="btn-secondary">
-            <Icon icon="mdi:refresh" class="text-lg" />
+            <Icon icon="mdi:refresh" class="btn-icon" />
             Sync Models
           </button>
           <button class="btn-primary">
-            <Icon icon="mdi:plus" class="text-lg" />
+            <Icon icon="mdi:plus" class="btn-icon" />
             Add Model
           </button>
         </div>

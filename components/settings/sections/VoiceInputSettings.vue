@@ -126,7 +126,7 @@
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <button class="p-2 text-neutral-600 hover:text-primary-600 rounded-lg">
+            <button class="btn-ghost p-2 hover:text-primary-600">
               <Icon icon="mdi:pencil" class="text-lg" />
             </button>
             <BaseToggle
