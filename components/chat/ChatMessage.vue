@@ -1,29 +1,21 @@
 <template>
-  <div class="flex gap-4" :class="message.role === 'user' ? 'flex-row-reverse' : ''">
-    <ChatAvatar
-      :role="message.role"
-      :model="selectedModel"
-    />
-    <div class="flex-1 min-w-0">
-      <div class="mb-2">
-        <span class="font-medium text-sm">
-          {{ message.role === 'assistant' ? 'Assistant' : 'You' }}
-        </span>
+  <div class="flex items-start space-x-3">
+    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+      <span :class="[isBot ? 'i-mdi-robot' : 'i-mdi-account', 'text-blue-600']" />
+    </div>
+    <div class="flex-1">
+      <div class="bg-white rounded-lg p-4 shadow-sm">
+        <p class="text-gray-800">{{ content }}</p>
       </div>
-      <MessageBubble
-        :variant="message.role === 'assistant' ? 'primary' : 'neutral'"
-        :content="message.content"
-      />
+      <span class="text-xs text-gray-500 mt-1 block">{{ time }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 defineProps<{
-  message: {
-    role: 'user' | 'assistant'
-    content: string
-  }
-  selectedModel?: string
+  content: string
+  time: string
+  isBot?: boolean
 }>()
 </script>

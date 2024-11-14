@@ -1,34 +1,7 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@unocss/nuxt'],
-  css: ['@unocss/reset/tailwind.css'],
-
-  app: {
-    head: {
-      title: 'Wrikka OS',
-      meta: [
-        { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' }
-      ]
-    },
-    pageTransition: { name: 'page', mode: 'out-in' }
-  },
-
+  compatibilityDate: '2024-04-03',
   devtools: { enabled: false },
-
-  experimental: {
-    inlineSSRStyles: false
-  },
-
-  ssr: false,
-
-  compatibilityDate: '2024-11-13',
-
-  // Add router configuration to redirect root to chat
-  router: {
-    options: {
-      redirect: {
-        '': '/chat'
-      }
-    }
-  }
+  modules: ['@unocss/nuxt'],
+  css: ['~/assets/css/main.css']
 })
