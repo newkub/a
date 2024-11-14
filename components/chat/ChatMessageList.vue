@@ -1,7 +1,7 @@
 <template>
   <div class="p-6 h-full overflow-y-auto" ref="messagesRef">
-    <div v-if="messages.length === 0" class="h-full flex items-center justify-center">
-      <EmptyState />
+    <div v-if="!hasMessages" class="h-full flex items-center justify-center">
+      <ChatEmptyState />
     </div>
     
     <template v-else>
@@ -13,18 +13,15 @@
 </template>
 
 <script setup lang="ts">
-interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-}
+import type { ChatMessage } from '~/types/chat'
 
 const props = defineProps<{
+  messages: ChatMessage[]
   selectedModel: string
-  messages: Message[]
 }>()
 
 const messagesRef = ref<HTMLElement>()
+const hasMessages = computed(() => props.messages.length > 0)
 
 const scrollToBottom = () => {
   nextTick(() => {
@@ -35,7 +32,6 @@ const scrollToBottom = () => {
 }
 
 watch(() => props.messages.length, scrollToBottom)
-
 onMounted(scrollToBottom)
 </script>
 
