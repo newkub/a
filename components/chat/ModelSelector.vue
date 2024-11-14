@@ -1,23 +1,11 @@
 <template>
-  <div class="relative flex-1">
+  <div class="relative">
     <button
       @click="isOpen = !isOpen"
-      class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-neutral-200 hover:border-neutral-300 transition-colors w-full"
+      class="w-full p-3 flex items-center justify-between bg-white border border-neutral-200 rounded-lg text-sm"
     >
-      <div class="flex items-center gap-2 flex-1 min-w-0">
-        <img 
-          :src="selectedProvider.avatar"
-          class="w-5 h-5 rounded flex-shrink-0"
-          :alt="selectedProvider.name"
-        />
-        <span class="font-medium truncate">{{ selectedProvider.name }}</span>
-        <span class="text-neutral-500 flex-shrink-0">/</span>
-        <span class="truncate">{{ selectedModel.name }}</span>
-      </div>
-      <Icon 
-        :icon="isOpen ? 'mdi:chevron-up' : 'mdi:chevron-down'" 
-        class="text-lg text-neutral-500 flex-shrink-0"
-      />
+      <span>{{ getModelName(modelValue) }}</span>
+      <Icon :icon="isOpen ? 'mdi:chevron-up' : 'mdi:chevron-down'" class="text-lg" />
     </button>
 
     <div
@@ -32,16 +20,24 @@
           class="w-full p-2 bg-neutral-50 rounded-lg text-sm"
         />
       </div>
-      <div class="max-h-64 overflow-y-auto p-2">
+
+      <div class="max-h-48 overflow-y-auto p-2">
         <div v-for="provider in filteredProviders" :key="provider.id" class="mb-2">
           <div class="flex items-center gap-2 p-1">
             <img
-              :src="provider.avatar"
+              v-if="provider.id === 'anthropic'"
+              src="https://avatars.githubusercontent.com/u/49760167?s=200&v=4"
               class="w-5 h-5 rounded"
-              :alt="provider.name"
+              alt="Anthropic"
+            />
+            <Icon
+              v-else-if="provider.id === 'openai'"
+              icon="simple-icons:openai"
+              class="w-5 h-5"
             />
             <span class="text-sm font-medium">{{ provider.name }}</span>
           </div>
+
           <div class="space-y-1 ml-6">
             <button
               v-for="model in provider.models"
@@ -61,7 +57,7 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import type { Provider, Model } from '~/types/chat'
+import { onClickOutside } from '@vueuse/core'
 
 const props = defineProps<{
   modelValue: string
@@ -74,11 +70,10 @@ const emit = defineEmits<{
 const isOpen = ref(false)
 const searchQuery = ref('')
 
-const providers: Provider[] = [
+const providers = [
   {
     id: 'anthropic',
     name: 'Anthropic',
-    avatar: 'https://avatars.githubusercontent.com/u/49760167?s=200&v=4',
     models: [
       { id: 'claude-3-haiku', name: 'Claude 3 Haiku' },
       { id: 'claude-3-opus', name: 'Claude 3 Opus' },
@@ -88,7 +83,6 @@ const providers: Provider[] = [
   {
     id: 'openai',
     name: 'OpenAI',
-    avatar: 'https://avatars.githubusercontent.com/u/14957082?s=200&v=4',
     models: [
       { id: 'gpt-4', name: 'GPT-4' },
       { id: 'gpt-4-turbo', name: 'GPT-4 Turbo' },
@@ -96,20 +90,6 @@ const providers: Provider[] = [
     ]
   }
 ]
-
-const selectedProvider = computed(() => {
-  const modelId = props.modelValue
-  return providers.find(p => p.models.some(m => m.id === modelId)) || providers[0]
-})
-
-const selectedModel = computed(() => {
-  const modelId = props.modelValue
-  for (const provider of providers) {
-    const model = provider.models.find(m => m.id === modelId)
-    if (model) return model
-  }
-  return providers[0].models[0]
-})
 
 const filteredProviders = computed(() => {
   if (!searchQuery.value) return providers
@@ -122,12 +102,28 @@ const filteredProviders = computed(() => {
   })).filter(provider => provider.models.length > 0)
 })
 
+const getModelName = (modelId: string) => {
+  for (const provider of providers) {
+    const model = provider.models.find(m => m.id === modelId)
+    if (model) return model.name
+  }
+  return 'Select a model'
+}
+
 const selectModel = (modelId: string) => {
   emit('update:modelValue', modelId)
   isOpen.value = false
 }
 
-onClickOutside(ref(null), () => {
+// Close dropdown when clicking outside
+const dropdownRef = ref(null)
+onClickOutside(dropdownRef, () => {
   isOpen.value = false
 })
 </script>
+
+<style scoped>
+.absolute {
+  z-index: 50;
+}
+</style>
